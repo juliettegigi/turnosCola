@@ -1,34 +1,34 @@
-
 // Referencias del HTML
-const lblOnline  = document.querySelector('#lblOnline');
-const lblOffline = document.querySelector('#lblOffline');
-const txtMensaje = document.querySelector('#txtMensaje');
-const btnGenerarTicket= document.querySelector('#btnGenerarTicket');
-
-
+const listado=document.getElementById("listado");
+const btnIngresar=document.querySelector('button');
+let conectado=true;
 const socket = io();
 
 
 
 socket.on('connect', () => {
     console.log('Conectado');
+    btnIngresar.disabled=false;
+    if(conectado)
+socket.emit('cantidad-escritorios',(cantidad)=>{
+
+    for(let i=1;i<=cantidad;i++){
+        const opc=document.createElement('option');
+        opc.value=i;
+        opc.innerHTML=i;
+        listado.appendChild(opc);
+    }
+     
+
+})
 
 });
 
 socket.on('disconnect', () => {
-    // console.log('Desconectado del servidor');
-
-    lblOnline.style.display  = 'none';
-    lblOffline.style.display = '';
+    conectado=false;
+    btnIngresar.disabled=true;
 });
 
 
 
-
-btnGenerarTicket.addEventListener( 'click', () => {
-
-    console.log("algo");
-    
-    socket.emit( 'generar-ticket');
-    });
 

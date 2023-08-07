@@ -29,9 +29,8 @@ socket.on('disconnect', () => {
 
 btnGenerarTicket.addEventListener( 'click', () => {
 
-    console.log("algo");
-    
-    socket.emit( 'generar-ticket',null,(ticketStr)=>{// le mando una función para que me la ejecute con el string "Ticket 8"
+  
+    socket.emit( 'generar-ticket',(ticketStr)=>{// le mando una función para que me la ejecute con el string "Ticket 8"
             lblNuevoTicket.innerHTML=ticketStr;
     });
     });

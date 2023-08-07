@@ -1,6 +1,8 @@
 const path=require('path');
 const fs=require('fs');
 
+const CANTIDAD_ESCRITORIOS=4;
+
 class Ticket{
     constructor(numero,escritorio){
         this.numero=numero;
@@ -10,13 +12,14 @@ class Ticket{
 
 class TicketControl{
     constructor(){
-        this.ultimo=0;//útimo ticket q voy a estar atendiendo
-        this.hoy=new Date().getDate();// tiene el número del dia, para saber si lo que tengo en la DB es igual al día de hoy
-        this.tickets=[];//acá van a estar todos los tickets pendientes,un arr de ticket
-        this.ultimos4=[];//son los que se muestran , el q se atiende y los 3 q le siguen
-        // a esto lo voy a almacenar en una DB, en un archivo json
+        
 
-        this.init();//inicializo
+        this.ultimo=0;// ticket q voy a estar atendiendo
+        this.hoy=new Date().getDate();// tiene el número del dia, para saber si lo que tengo en la DB es igual al día de hoy
+        this.tickets=[];//tickets por atender,un arr de ticket
+        this.ticketXescritorio=[];//los que están siendo atendidos,tengo cuatro escritorios
+        // a esto lo voy a almacenar en una DB, en un archivo json
+        this.init();//si se cae el sevidor, tengo que cargarlos con datos que tenía
     }
 
  
@@ -29,37 +32,39 @@ class TicketControl{
     //para inicializar la clase
     init(){
        //leo el archivo json
-       const {hoy,tickets,ultimo,ultimos4}=require('../db/data.json');// es un json, pero data va a ser un objeto literal de js
-       //tengo que evaluar si el dia de hoy es igual al de la data
-       if(hoy===this.hoy){ // estoy en el mismo dia y estoy recargando el servidor
+       const {hoy,tickets,ultimo,ticketXescritorio}=require('../db/data.json');// es un json, pero data va a ser un objeto literal de js
+       
+       if(hoy===this.hoy){ // estoy en el mismo dia==>recargo el servidor
         this.tickets=tickets;
         this.ultimo=ultimo;
-        this.ultimos4=ultimos4;
+        this.ticketXescritorio=ticketXescritorio;
        }
        else{ //sino es otro dia
-         this.guardarDB(); //reinicializo las variables
+         this.guardarDB(); //guardo las variables con la inicialización q se hizo en el constructor
        }
     } 
 
-   encolar(){
+   encolarTickets(){
     this.ultimo+=1;
-    const ticket=new Ticket(this.ultimo,null);
-    this.tickets.push(ticket);// una vez insertado lo guardo en la DB
-    this.guardarDB();//para saber cual fue el nuevo ticket  y se quedara ahí por si se reiniciase el backend
-    return 'Ticket '+this.ultimo;
+    const ticket=new Ticket(this.ultimo,null);//creo un ticket, solo le pongo el número, porq el escritorio se va a asignar cuando se descole
+    this.tickets.push(ticket);// una vez insertado actualizo la DB
+    this.guardarDB();
+    return 'Ticket '+this.ultimo; //retorno el ticket creado y encolado
    }
 
-   atenderTicket(escritorio){//el escritorio es el que atiende un ticket respectivo //retorno el ticket q este escritorio tiene que atender
+   atenderTicket(escritorio){//se descola y se le asigna un escritorio al ticket
     //validar si no tengo ticket
     if(this.tickets.length===0){return null;}
-    const ticket=this.tickets.shift();//me retorna el elemento eliminado, el 1ro. Este es el ticket que tengo q atender ahora y este tiene que estar en los ultimos4, en la pantalla
+    //quito el 1er elemento del arreglo y lo pongo en el arreglo de los escritorios para que se vayan mostrando por pantalla los atendidos
+    const ticket=this.tickets.shift();
     ticket.escritorio=escritorio;
-    this.ultimos4.unshift(ticket);//añado al inicio
-    if(this.ultimos4.length>4){
-        this.ultimos4.splice(-1,1);//1er arg=position,-1 quiere decir "fin del arr", me remueve los elementos, desde el final del arr, segundo argumento=cantidad==> me remueve un elemento desde el final del arr y el 3er,4to...argumentos son elementos que quiero agregar 
-    }  
+    this.ticketXescritorio[escritorio-1]=ticket;//actualizo la DB
     this.guardarDB();
     return ticket 
+}
+
+cantidadDeEscritorios(){
+    return CANTIDAD_ESCRITORIOS;   
 }
  
 }

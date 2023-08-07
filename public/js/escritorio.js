@@ -3,12 +3,8 @@ const btnAtender=document.querySelector("#btnAtender")
 const atendiendoA=document.querySelector("#atendiendoA")
 const divNoTickets=document.querySelector("#divNoTickets")
 const lblPendientes=document.getElementById("lblPendientes")
-function comienzaConEscritorioYNumero(palabra) {
 
-    const regex = /^escritorio \d+$/;
-    
-    return  regex.test(palabra)
-  }
+const socket = io();
 
 
 
@@ -16,22 +12,26 @@ function comienzaConEscritorioYNumero(palabra) {
 const searchParams=new URLSearchParams(window.location.search);
 if(!searchParams.has('escritorio')){// si no existe "escritorio" en la url
     window.location='index.html'; // lleva al usuario a index.html
-    throw new Error('El escritorio es obligatorio')
+  //  throw new Error('El escritorio es obligatorio')
 }
+
 
 const escritorio=searchParams.get("escritorio");//escritorio que me viene en la url
 
-if(!comienzaConEscritorioYNumero(escritorio))// si no tiene la forma escritorio+numero
-   window.location='index.html'; // lleva al usuario a index.html
+socket.emit('cantidad-escritorios',(cantidad)=>{
 
-// coloco el nombre del escritorio en el h4   
-escritorioh1.innerHTML=escritorio;   
+      if(!(escritorio<=cantidad && escritorio>=1 && Math.floor(escritorio)==escritorio))
+          window.location='index.html'; // lleva al usuario a index.html
+})
+
+// coloco el nombre del escritorio en el h1  
+escritorioh1.innerHTML="Escritorio "+escritorio;   
 divNoTickets.style.display='none';
 
 
 
 
-const socket = io();
+
 
 
 
@@ -64,9 +64,8 @@ btnAtender.addEventListener( 'click', () => {
           audio.play();
         }
          
-        else {
-            atendiendoA.innerHTML="Nadie.";
-            }
+        else atendiendoA.innerHTML="Nadie.";
+            
      })
     
     });
